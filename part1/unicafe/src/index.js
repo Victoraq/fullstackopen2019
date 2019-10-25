@@ -25,12 +25,8 @@ const Stats = ({text, value}) => {
 }
 
 
-const App = () => {
-    // save clicks of each button to own state
-    const [good, setGood] = useState(0)
-    const [neutral, setNeutral] = useState(0)
-    const [bad, setBad] = useState(0)
-
+const Statistics = ({good, neutral, bad}) => {
+    
     const total = () => good+neutral+bad
 
     const average = (good, neutral, bad) => {
@@ -40,6 +36,25 @@ const App = () => {
     }
 
     const percentage = (value) => 100*value/total() + "%"
+
+    return (
+        <div>
+            <Stats text="good" value={good}/>
+            <Stats text="neutral" value={neutral}/>
+            <Stats text="bad" value={bad}/>
+            <Stats text="all" value={total()}/>
+            <Stats text="avg" value={average(good, neutral, bad)}/>
+            <Stats text="positive" value={percentage(good)}/>
+        </div>
+    )
+}
+
+
+const App = () => {
+    // save clicks of each button to own state
+    const [good, setGood] = useState(0)
+    const [neutral, setNeutral] = useState(0)
+    const [bad, setBad] = useState(0)
 
     return ( 
         <div>
@@ -51,12 +66,7 @@ const App = () => {
 
             <Title text="statistics"/>
 
-            <Stats text="good" value={good}/>
-            <Stats text="neutral" value={neutral}/>
-            <Stats text="bad" value={bad}/>
-            <Stats text="all" value={total()}/>
-            <Stats text="avg" value={average(good, neutral, bad)}/>
-            <Stats text="positive" value={percentage(good)}/>
+            <Statistics good={good} neutral={neutral} bad={bad}/>            
         </div>
     )
 }
