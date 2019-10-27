@@ -10,11 +10,20 @@ const Button = ({handleClick, text}) => {
     )
 }
 
+
+const Title = ({text}) => {
+    return (
+        <h1>{text}</h1>
+    )
+}
+
+
 const Part = ({text}) => {
     return (
         <p>{text}</p>
     )
 }
+
 
 const App = (props) => {
     const [selected, setSelected] = useState(0)
@@ -28,19 +37,26 @@ const App = (props) => {
     const handleVote = (pos) => () => {
         // as we can't change directly the votes state
         // we make a copy of the values changing the desired position 
-        const newVotes = { ...votes }
+        const newVotes = [ ...votes ]
         newVotes[pos] += 1
         
         // modifying the votes states with the changed copy
         setVotes(newVotes)
     }
 
+    const mostVoted = () => votes.indexOf(Math.max(...votes))
+
     return (
         <div>
+            <Title text={"Anecdote of the day"}/>
             <Part text={props.anecdotes[selected]}/>
             <Part text={"has "+votes[selected]+" votes"}/>
             <Button handleClick={handleVote(selected)} text={"vote"}/>
             <Button handleClick={sortAnecdote} text={"next anecdote"}/>
+
+            <Title text={"Anecdote with most votes"}/>
+            <Part text={props.anecdotes[mostVoted()]}/>
+            <Part text={"has "+votes[mostVoted()]+" votes"}/>
         </div>
     )
 }
