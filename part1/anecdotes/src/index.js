@@ -18,15 +18,29 @@ const Part = ({text}) => {
 
 const App = (props) => {
     const [selected, setSelected] = useState(0)
+    const zeroArray = Array(anecdotes.length).fill(0) // array filled with zeros with length of the anecdotes array
+    const [votes, setVotes] = useState(zeroArray) // state to store the votes
 
     const sortAnecdote = () => {
         setSelected(Math.floor((Math.random() * anecdotes.length)))
     }
 
+    const handleVote = (pos) => () => {
+        // as we can't change directly the votes state
+        // we make a copy of the values changing the desired position 
+        const newVotes = { ...votes }
+        newVotes[pos] += 1
+        
+        // modifying the votes states with the changed copy
+        setVotes(newVotes)
+    }
+
     return (
         <div>
-        <Part text={props.anecdotes[selected]}/>
-        <Button handleClick={sortAnecdote} text={"next anecdote"}/>
+            <Part text={props.anecdotes[selected]}/>
+            <Part text={"has "+votes[selected]+" votes"}/>
+            <Button handleClick={handleVote(selected)} text={"vote"}/>
+            <Button handleClick={sortAnecdote} text={"next anecdote"}/>
         </div>
     )
 }
