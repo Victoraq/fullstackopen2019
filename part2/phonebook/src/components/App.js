@@ -14,6 +14,13 @@ const App = () => {
 
     const addPerson = (event) => {
         event.preventDefault()
+
+        // Look for the new name in the persons list to avoid repetition
+        if (persons.find(p => p.name === newName)) {
+            window.alert(`${newName} is already added to phonebook`)
+            setNewName('')
+            return
+        }
         
         const newPerson = { name: newName }
 
