@@ -1,5 +1,50 @@
 import React, { useState } from 'react'
 
+
+const PersonForm = (props) => {
+    return (
+        <div>
+            <form onSubmit={props.addPerson}>
+                <div>name: <input value={props.newName} onChange={props.handleNameChange}/></div>
+                <div>number: <input value={props.newNumber} onChange={props.handleNumberChange}/></div>
+                <div>
+                    <button type="submit">add</button>
+                </div>
+            </form>
+        </div>
+    )
+}
+
+
+const Filter = ({filter, handleFilter}) => {
+    return (
+        <div>
+            filter show with <input value={filter} onChange={handleFilter}/>
+        </div>
+    )
+}
+
+
+const PersonInfo = ({person}) => {
+    return (
+        <p>{person.name}  {person.number}</p>
+    )
+}
+
+
+const Persons = ({persons, filterBy}) => {
+    const numbers = () => {
+        // filter the persons by a string filter
+        const personsToShow = persons.filter(p => p.name.toLowerCase().includes(filterBy))
+
+        return personsToShow.map(p => <PersonInfo key={p.name} person={p}/>)
+    }
+
+    return numbers()
+
+}
+
+
 const App = () => {
     const [ persons, setPersons] = useState([
         { name: 'Arto Hellas', number: '040-1234567'},
@@ -11,13 +56,6 @@ const App = () => {
     const [ newNumber, setNewNumber ] = useState('')
     const [ filterName, setFilterName ] = useState('')
 
-    const numbers = () => {
-        // filter the persons by a string filter
-        const personsToShow = persons.filter(p => p.name.toLowerCase().includes(filterName))
-
-        return personsToShow.map(p => <p key={p.name}>{p.name}  {p.number}</p>)
-    }
-
     const handleNameChange = (event) => {
         setNewName(event.target.value)
     }
@@ -27,7 +65,7 @@ const App = () => {
     }
 
     const handleFilterChange = (event) => {
-        setFilterName(event.target.value)
+        setFilterName(event.target.value.toLowerCase())
     }
 
     const addPerson = (event) => {
@@ -51,17 +89,19 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
-            <div>filter show with <input value={filterName} onChange={handleFilterChange}/></div>
-            <h2>add a new</h2>
-            <form onSubmit={addPerson}>
-            <div>name: <input value={newName} onChange={handleNameChange}/></div>
-            <div>number: <input value={newNumber} onChange={handleNumberChange}/></div>
-            <div>
-                <button type="submit">add</button>
-            </div>
-            </form>
+            
+            <Filter filter={filterName} handleFilter={handleFilterChange}/>
+            
+            <h3>Add a new</h3>
+            
+            <PersonForm 
+                addPerson={addPerson} newName={newName} newNumber={newNumber} 
+                handleNameChange={handleNameChange} handleNumberChange={handleNumberChange}
+            />
+
             <h2>Numbers</h2>
-            {numbers()}
+
+            <Persons persons={persons} filterBy={filterName}/>
         </div>
     )
 }
