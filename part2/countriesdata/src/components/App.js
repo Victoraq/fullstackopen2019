@@ -11,10 +11,10 @@ const Search = ({search, handleSearch}) => {
 }
 
 
-const Country = ({country}) => {
+const Country = ({country, handleClick}) => {
     return (
         <div>
-            <p>{country.name}</p>
+            <p>{country.name} <button onClick={() => handleClick(country.name)}>show</button></p>
         </div>
     )
 }
@@ -43,7 +43,7 @@ const Stats = ({country}) => {
 }
 
 
-const Countries = ({countries, filterBy}) => {
+const Countries = ({countries, filterBy, handleClick}) => {
 
     const toShow = () => {
         const countriesToShow = countries.filter(
@@ -53,7 +53,9 @@ const Countries = ({countries, filterBy}) => {
         if (countriesToShow.length === 1) {
             return <Stats country={countriesToShow[0]}/>
         } else {
-            return countriesToShow.map(country => <Country key={country.name} country={country}/>)
+            return countriesToShow.map(
+                country => <Country key={country.name} country={country} handleClick={handleClick}/>
+            )
         }
     }
 
@@ -90,10 +92,17 @@ const App = () => {
     }
 
 
+    const handleClick = (country) => {
+        setFindCountry(country.toLowerCase())
+    }
+
+
     return (
         <div>
             <Search search={findCountry} handleSearch={handleFinder}/>
-            <Countries countries={countries} filterBy={findCountry}/>
+            <Countries 
+                countries={countries} filterBy={findCountry}  handleClick={handleClick}
+            />
         </div>
     )
 }
