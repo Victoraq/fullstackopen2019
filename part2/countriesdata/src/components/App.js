@@ -20,8 +20,10 @@ const Country = ({country, handleClick}) => {
 }
 
 
-const Stats = ({country}) => {
-    
+const Stats = ({country, weather, weatherHandle}) => {
+
+    useEffect(weatherHandle,[])
+
     const languages = () => country.languages.map(lang => <li key={lang.name}>{lang.name}</li>)
 
     return (
@@ -38,12 +40,15 @@ const Stats = ({country}) => {
 
             <img src={country.flag} alt="flag" width="10%" height="10%"/>
 
+            <h3>Weather in {country.capital}</h3>
+            <p><b>temperature:</b> {weather.main.temp} Celsius</p>
+            <p><b>wind:</b> {weather.wind.speed} m/s</p>
         </div>
     )
 }
 
 
-const Countries = ({countries, filterBy, handleClick}) => {
+const Countries = ({countries, filterBy, handleClick, weather, weatherHandle}) => {
 
     const toShow = () => {
         const countriesToShow = countries.filter(
@@ -51,7 +56,8 @@ const Countries = ({countries, filterBy, handleClick}) => {
             )
         
         if (countriesToShow.length === 1) {
-            return <Stats country={countriesToShow[0]}/>
+            const country = countriesToShow[0]
+            return <Stats country={country} weather={weather} weatherHandle={() => weatherHandle(country.capital)}/>
         } else {
             return countriesToShow.map(
                 country => <Country key={country.name} country={country} handleClick={handleClick}/>
@@ -75,16 +81,27 @@ const Countries = ({countries, filterBy, handleClick}) => {
 const App = () => {
     const [ countries, setCountries] = useState([])
     const [ findCountry, setFindCountry ] = useState('')
-
+    const [ weatherData, setWeatherData] = useState({})
 
     // get data from the server
-    const getData = () => {
+    const getCountryData = () => {
         axios
             .get('https://restcountries.eu/rest/v2/all')
             .then(response => setCountries(response.data))
     }
+
+    const getWeatherData = (city) => {
+        // change the appid to your key
+        axios
+            .get('http://api.openweathermap.org/data/2.5/weather?q='+city+'&units=metric&APPID=b6907d289e10d714a6e88b30761fae22')
+            .then(response => setWeatherData(response.data))
+    }
     
-    useEffect(getData,[])
+    useEffect(getCountryData,[])
+
+    // initializes the object
+    useEffect(() => getWeatherData('London'),[])
+    console.log(weatherData)
 
 
     const handleFinder = (event) => {
@@ -102,6 +119,7 @@ const App = () => {
             <Search search={findCountry} handleSearch={handleFinder}/>
             <Countries 
                 countries={countries} filterBy={findCountry}  handleClick={handleClick}
+                weather={weatherData} weatherHandle={getWeatherData}
             />
         </div>
     )
