@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import phoneService from '../services/phones.js'
 
 const PersonForm = (props) => {
     return (
@@ -54,9 +54,9 @@ const App = () => {
 
     // get data from the server
     const getData = () => {
-        axios
-            .get('http://localhost:3001/persons')
-            .then(response => setPersons(response.data))
+        phoneService
+            .getAll()
+                .then(persons => setPersons(persons))
     }
     
     useEffect(getData,[])
@@ -86,6 +86,7 @@ const App = () => {
         
         const newPerson = { name: newName, number: newNumber }
 
+        phoneService.create(newPerson)
         setPersons(persons.concat(newPerson))
         setNewName('')
         setNewNumber('')
