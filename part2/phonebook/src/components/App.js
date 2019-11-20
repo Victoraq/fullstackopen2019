@@ -25,19 +25,28 @@ const Filter = ({filter, handleFilter}) => {
 }
 
 
-const PersonInfo = ({person}) => {
+const DeleteButton = ({person, handleDelete}) => {
     return (
-        <p>{person.name}  {person.number}</p>
+        <button onClick={() => handleDelete(person)}>delete</button>
     )
 }
 
 
-const Persons = ({persons, filterBy}) => {
+const PersonInfo = ({person, handleDelete}) => {
+    return (
+        <div>
+            <p>{person.name}  {person.number} <DeleteButton person={person} handleDelete={handleDelete}/></p> 
+        </div>
+    )
+}
+
+
+const Persons = ({persons, filterBy, handleDelete}) => {
     const numbers = () => {
         // filter the persons by a string filter
         const personsToShow = persons.filter(p => p.name.toLowerCase().includes(filterBy))
 
-        return personsToShow.map(p => <PersonInfo key={p.name} person={p}/>)
+        return personsToShow.map(p => <PersonInfo key={p.name} person={p} handleDelete={handleDelete}/>)
     }
 
     return numbers()
@@ -56,7 +65,7 @@ const App = () => {
     const getData = () => {
         phoneService
             .getAll()
-                .then(persons => setPersons(persons))
+                .then(personsData => setPersons(personsData))
     }
     
     useEffect(getData,[])
@@ -73,6 +82,14 @@ const App = () => {
         setFilterName(event.target.value.toLowerCase())
     }
 
+    const handleDelete = (person) => {
+        if (window.confirm("Delete "+person.name)) {
+            phoneService.deleteById(person.id)
+            const newPersons = persons.filter(p => p.id !== person.id)
+            setPersons(newPersons)
+        }
+    }
+
     const addPerson = (event) => {
         event.preventDefault()
 
@@ -87,7 +104,7 @@ const App = () => {
         const newPerson = { name: newName, number: newNumber }
 
         phoneService.create(newPerson)
-        setPersons(persons.concat(newPerson))
+            .then(personsData => setPersons(persons.concat(personsData)) )
         setNewName('')
         setNewNumber('')
     }
@@ -107,7 +124,7 @@ const App = () => {
 
             <h2>Numbers</h2>
 
-            <Persons persons={persons} filterBy={filterName}/>
+            <Persons persons={persons} filterBy={filterName} handleDelete={handleDelete}/>
         </div>
     )
 }
