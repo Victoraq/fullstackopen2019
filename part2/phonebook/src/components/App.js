@@ -94,8 +94,19 @@ const App = () => {
         event.preventDefault()
 
         // Look for the new name in the persons list to avoid repetition
-        if (persons.find(p => p.name === newName)) {
-            window.alert(`${newName} is already added to phonebook`)
+        const findPerson = persons.find(p => p.name === newName)
+        if (findPerson) {
+            if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+
+                const updatedPerson = {...findPerson, number : newNumber}
+                phoneService
+                    .update(updatedPerson.id, updatedPerson)
+                        .then(response => {
+                            // mapping the persons to find out which person changed to replace by the new one
+                            setPersons(persons.map(p => p.id !== response.id ? p : response))
+                        })
+
+            }   
             setNewName('')
             setNewNumber('')
             return
