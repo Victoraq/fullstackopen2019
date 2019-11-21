@@ -41,6 +41,30 @@ const PersonInfo = ({person, handleDelete}) => {
 }
 
 
+const Notification = ({message}) => {
+
+    const notificationStyle = {
+        color: 'green',
+        background: 'lightgrey',
+        fontSize: 20,
+        borderStyle: 'solid',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 10
+    }
+
+    if (message === null) {
+        return null
+    }
+
+    return (
+        <div style={notificationStyle}>
+            {message}
+        </div>
+    )
+}
+
+
 const Persons = ({persons, filterBy, handleDelete}) => {
     const numbers = () => {
         // filter the persons by a string filter
@@ -59,6 +83,7 @@ const App = () => {
     const [ newName, setNewName ] = useState('')
     const [ newNumber, setNewNumber ] = useState('')
     const [ filterName, setFilterName ] = useState('')
+    const [ addMessage, setAddMessage ] = useState(null)
 
 
     // get data from the server
@@ -101,10 +126,17 @@ const App = () => {
                 const updatedPerson = {...findPerson, number : newNumber}
                 phoneService
                     .update(updatedPerson.id, updatedPerson)
-                        .then(response => {
-                            // mapping the persons to find out which person changed to replace by the new one
-                            setPersons(persons.map(p => p.id !== response.id ? p : response))
-                        })
+                    .then(response => {
+                        // mapping the persons to find out which person changed to replace by the new one
+                        setPersons(persons.map(p => p.id !== response.id ? p : response))
+                    })
+                    .then(() => {
+                        setAddMessage(`Changed ${newName}`)
+                        
+                        setTimeout(() => {
+                            setAddMessage(null)
+                        }, 3000)
+                    })
 
             }   
             setNewName('')
@@ -115,7 +147,14 @@ const App = () => {
         const newPerson = { name: newName, number: newNumber }
 
         phoneService.create(newPerson)
-            .then(personsData => setPersons(persons.concat(personsData)) )
+            .then(personData =>setPersons(persons.concat(personData)))
+            .then(() => {
+                setAddMessage(`Added ${newName}`)
+                
+                setTimeout(() => {
+                    setAddMessage(null)
+                }, 3000)
+            })
         setNewName('')
         setNewNumber('')
     }
@@ -124,6 +163,8 @@ const App = () => {
         <div>
             <h2>Phonebook</h2>
             
+            <Notification message={addMessage}/>
+
             <Filter filter={filterName} handleFilter={handleFilterChange}/>
             
             <h3>Add a new</h3>
