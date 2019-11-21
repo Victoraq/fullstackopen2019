@@ -41,10 +41,10 @@ const PersonInfo = ({person, handleDelete}) => {
 }
 
 
-const Notification = ({message}) => {
+const Notification = ({message, messageColor}) => {
 
     const notificationStyle = {
-        color: 'green',
+        color: messageColor,
         background: 'lightgrey',
         fontSize: 20,
         borderStyle: 'solid',
@@ -83,7 +83,8 @@ const App = () => {
     const [ newName, setNewName ] = useState('')
     const [ newNumber, setNewNumber ] = useState('')
     const [ filterName, setFilterName ] = useState('')
-    const [ addMessage, setAddMessage ] = useState(null)
+    const [ message, setMessage ] = useState(null)
+    const [ messageColor, setMessageColor ] = useState(null)
 
 
     // get data from the server
@@ -124,6 +125,7 @@ const App = () => {
             if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
 
                 const updatedPerson = {...findPerson, number : newNumber}
+
                 phoneService
                     .update(updatedPerson.id, updatedPerson)
                     .then(response => {
@@ -131,11 +133,24 @@ const App = () => {
                         setPersons(persons.map(p => p.id !== response.id ? p : response))
                     })
                     .then(() => {
-                        setAddMessage(`Changed ${newName}`)
+                        setMessage(`Changed ${newName}`)
+                        setMessageColor('green')
                         
                         setTimeout(() => {
-                            setAddMessage(null)
-                        }, 3000)
+                            setMessage(null)
+                        }, 3500)
+                    })
+                    .catch(() => {
+                        setMessage(
+                            `Information of ${newName} has already been removed from server`
+                        )
+                        setMessageColor('red')
+                        
+                        setPersons(persons.filter(p => p.name !== newName))
+                        
+                        setTimeout(() => {
+                            setMessage(null)
+                        }, 3500)
                     })
 
             }   
@@ -149,11 +164,12 @@ const App = () => {
         phoneService.create(newPerson)
             .then(personData =>setPersons(persons.concat(personData)))
             .then(() => {
-                setAddMessage(`Added ${newName}`)
+                setMessage(`Added ${newName}`)
+                setMessageColor('green')
                 
                 setTimeout(() => {
-                    setAddMessage(null)
-                }, 3000)
+                    setMessage(null)
+                }, 3500)
             })
         setNewName('')
         setNewNumber('')
@@ -163,7 +179,7 @@ const App = () => {
         <div>
             <h2>Phonebook</h2>
             
-            <Notification message={addMessage}/>
+            <Notification message={message} messageColor={messageColor}/>
 
             <Filter filter={filterName} handleFilter={handleFilterChange}/>
             
