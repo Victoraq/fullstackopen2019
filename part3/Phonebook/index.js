@@ -5,7 +5,14 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 
 app.use(bodyParser.json())
-app.use(morgan('tiny'))
+
+morgan.token('request-body', (req, res) => {
+	if (req.method === 'POST') {
+		return JSON.stringify(req.body)
+	}
+})
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :request-body'))
 
 
 phoneList = [
