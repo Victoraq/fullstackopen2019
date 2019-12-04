@@ -1,6 +1,9 @@
 
 const express = require('express')
 const app = express()
+const bodyParser = require('body-parser')
+
+app.use(bodyParser.json())
 
 
 phoneList = {
@@ -52,6 +55,37 @@ app.get('/info', (request, response) => {
         `<p>Phonebook has info for ${phoneList["persons"].length} people </p>
          <p>${new Date()}</p>`
     )
+})
+
+
+const generateId = () => {
+	const min = phoneList["persons"].length
+
+	const id = Math.floor(Math.random() * (10000000 - min) + min)
+	
+	return id
+}
+
+
+app.post('/api/persons', (request, response) => {
+
+	const body = request.body
+	
+	if (!body.name) {
+		return response.status(400).json({
+			error: 'content missing'
+		})
+	}
+
+	const person = {
+		name: body.name,
+		phone: body.number,
+		id: generateId(),
+	}
+
+	phoneList["persons"] = phoneList["persons"].concat(person)
+	
+	response.json(person)
 })
 
 
