@@ -5,3 +5,31 @@ Content-Type: application/json
     "name": "Jon Snow",
     "number": "55-542-424325"
 }
+
+###
+
+post http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "Jon Snow",
+    "number": "22-412-1214412"
+}
+
+###
+
+post http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "number": "22-412-1214412"
+}
+
+###
+
+post http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "Jon Snow"
+}

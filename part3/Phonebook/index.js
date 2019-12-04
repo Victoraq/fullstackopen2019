@@ -6,8 +6,7 @@ const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
 
-phoneList = {
-    "persons": [
+phoneList = [
       {
         "name": "Arto Hellas",
         "number": "040-123456",
@@ -29,17 +28,16 @@ phoneList = {
         "id": 4
       }
     ]
-  }
 
 
 app.get('/api/persons', (request, response) => { 
-    response.json(phoneList["persons"]) 
+    response.json(phoneList) 
 }) 
 
 
 app.get('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    const person = phoneList["persons"].find(person => person.id === id)
+    const person = phoneList.find(person => person.id === id)
 
     if (person) {
         response.json(person)
@@ -52,14 +50,14 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.get('/info', (request, response) => {
     response.send(
-        `<p>Phonebook has info for ${phoneList["persons"].length} people </p>
+        `<p>Phonebook has info for ${phoneList.length} people </p>
          <p>${new Date()}</p>`
     )
 })
 
 
 const generateId = () => {
-	const min = phoneList["persons"].length
+	const min = phoneList.length
 
 	const id = Math.floor(Math.random() * (10000000 - min) + min)
 	
@@ -71,9 +69,16 @@ app.post('/api/persons', (request, response) => {
 
 	const body = request.body
 	
-	if (!body.name) {
+	if (!body.name || !body.number) {
 		return response.status(400).json({
-			error: 'content missing'
+			error: 'name or number missing'
+		})
+	}
+
+	const findName = phoneList.find(person => person.name === body.name)
+	if (findName) {
+		return response.status(400).json({
+			error: 'name must be unique'
 		})
 	}
 
@@ -83,7 +88,7 @@ app.post('/api/persons', (request, response) => {
 		id: generateId(),
 	}
 
-	phoneList["persons"] = phoneList["persons"].concat(person)
+	phoneList = phoneList.concat(person)
 	
 	response.json(person)
 })
@@ -91,7 +96,7 @@ app.post('/api/persons', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    phoneList["persons"] = phoneList["persons"].filter(person => person.id !== id)
+    phoneList = phoneList.filter(person => person.id !== id)
 
     response.status(204).end()
 })
