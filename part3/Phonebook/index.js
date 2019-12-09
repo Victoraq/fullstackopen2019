@@ -3,8 +3,11 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
+const cors = require('cors')
 
+app.use(cors())
 app.use(bodyParser.json())
+app.use(express.static('build'))
 
 morgan.token('request-body', (req, res) => {
 	if (req.method === 'POST') {
@@ -93,7 +96,7 @@ app.post('/api/persons', (request, response) => {
 
 	const person = {
 		name: body.name,
-		phone: body.number,
+		number: body.number,
 		id: generateId(),
 	}
 
