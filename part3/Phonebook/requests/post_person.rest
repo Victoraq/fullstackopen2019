@@ -1,4 +1,4 @@
-post http://localhost:3001/api/persons
+post https://fsto-phonebook.herokuapp.com/api/persons
 Content-Type: application/json
 
 {
@@ -8,7 +8,7 @@ Content-Type: application/json
 
 ###
 
-post http://localhost:3001/api/persons
+post https://fsto-phonebook.herokuapp.com/api/persons
 Content-Type: application/json
 
 {
@@ -18,7 +18,7 @@ Content-Type: application/json
 
 ###
 
-post http://localhost:3001/api/persons
+post https://fsto-phonebook.herokuapp.com/api/persons
 Content-Type: application/json
 
 {
@@ -27,7 +27,7 @@ Content-Type: application/json
 
 ###
 
-post http://localhost:3001/api/persons
+post https://fsto-phonebook.herokuapp.com/api/persons
 Content-Type: application/json
 
 {
