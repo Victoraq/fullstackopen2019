@@ -85,22 +85,15 @@ app.post('/api/persons', (request, response) => {
 		})
 	}
 
-	const findName = phoneList.find(person => person.name === body.name)
-	if (findName) {
-		return response.status(400).json({
-			error: 'name must be unique'
-		})
-	}
-
-	const person = {
+	const phone = new Phone({
 		name: body.name,
 		number: body.number,
 		id: generateId(),
-	}
+	})
 
-	phoneList = phoneList.concat(person)
-	
-	response.json(person)
+	phone.save().then(savedPhone => {
+		response.json(savedPhone.toJSON())
+	})
 })
 
 
