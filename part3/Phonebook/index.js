@@ -19,29 +19,7 @@ morgan.token('request-body', (req, res) => {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :request-body'))
 
 
-phoneList = [
-      {
-        "name": "Arto Hellas",
-        "number": "040-123456",
-        "id": 1
-      },
-      {
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523",
-        "id": 2
-      },
-      {
-        "name": "Dan Abramov",
-        "number": "12-43-234345",
-        "id": 3
-      },
-      {
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122",
-        "id": 4
-      }
-    ]
-
+// Routes
 
 app.get('/api/persons', (request, response) => { 
 	Phone.find({}).then(persons => {
@@ -93,11 +71,29 @@ app.post('/api/persons', (request, response) => {
 })
 
 
-app.delete('/api/persons/:id', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
+	const body = request.body
+
+	const phone = {
+		name: body.name,
+		number: body.number,
+	}
+
+	Phone.findByIdAndUpdate(request.params.id, phone)
+		.then(updatedPhone => {
+			response.json(updatedPhone.toJSON())
+		})
+		.catch(error => next(error))
+
+})
+
+
+app.delete('/api/persons/:id', (request, response, next) => {
 	Phone.findByIdAndRemove(request.params.id)
 		.then(result => {
 			response.status(204).end()
 		})
+		.catch(error => next(error))
 })
 
 
