@@ -7,8 +7,8 @@ const cors = require('cors')
 const Phone = require('./models/phones')
 
 app.use(cors())
-app.use(bodyParser.json())
 app.use(express.static('build'))
+app.use(bodyParser.json())
 
 morgan.token('request-body', (req, res) => {
 	if (req.method === 'POST') {
@@ -50,11 +50,17 @@ app.get('/api/persons', (request, response) => {
 }) 
 
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
     const id = request.params.id
-    Phone.findById(id).then(phone => {
-    	response.json(phone.toJSON())
-    })
+	Phone.findById(id)
+		.then(phone => {
+			if (phone) {
+				response.json(phone.toJSON())
+			} else {
+				next()
+			}
+		})
+		.catch(error => next(error))
 })
 
 
@@ -64,15 +70,6 @@ app.get('/info', (request, response) => {
          <p>${new Date()}</p>`
     )
 })
-
-
-const generateId = () => {
-	const min = phoneList.length
-
-	const id = Math.floor(Math.random() * (10000000 - min) + min)
-	
-	return id
-}
 
 
 app.post('/api/persons', (request, response) => {
@@ -88,7 +85,6 @@ app.post('/api/persons', (request, response) => {
 	const phone = new Phone({
 		name: body.name,
 		number: body.number,
-		id: generateId(),
 	})
 
 	phone.save().then(savedPhone => {
@@ -103,6 +99,26 @@ app.delete('/api/persons/:id', (request, response) => {
 			response.status(204).end()
 		})
 })
+
+
+// error middlewares
+const unknownEndpoint = (request, response) => {
+	response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+	console.log(error.message)
+
+	if (error.name === 'CastError' && error.kind === 'ObjectId') {
+		return response.status(400).send({error: 'malformatted id'})
+	}
+
+	next(error)
+}
+
+app.use(errorHandler)
 
 
 const PORT = process.env.PORT
