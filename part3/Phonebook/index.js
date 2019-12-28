@@ -42,11 +42,14 @@ app.get('/api/persons/:id', (request, response, next) => {
 })
 
 
-app.get('/info', (request, response) => {
-    response.send(
-        `<p>Phonebook has info for ${phoneList.length} people </p>
-         <p>${new Date()}</p>`
-    )
+app.get('/info', (request, response, next) => {
+	Phone.countDocuments((err, number) => 
+		response.send(
+			`<p>Phonebook has info for ${number} people </p>
+			<p>${new Date()}</p>`
+		)
+	)
+	.catch(error => next(error))
 })
 
 
