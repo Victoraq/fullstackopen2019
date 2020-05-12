@@ -10,7 +10,7 @@ beforeEach(async () => {
     await Blog.deleteMany({})
 
     const blogObjects = helper.initialBlogs
-                        .map(blog => new Blog(blog))
+        .map(blog => new Blog(blog))
 
     const promiseArray = blogObjects.map(blog => blog.save())
     await Promise.all(promiseArray)
@@ -35,6 +35,27 @@ test('id property is named correctly', async () => {
     const blog = response.body[0]
 
     expect(blog.id).toBeDefined()
+})
+
+test('a valid blog can be added', async () => {
+    const newBlog = {
+        "title": "some new blog",
+        "author": "the new master",
+        "url": "newmasterblog.com",
+        "likes": "8999"
+    }
+
+    await api.post('/api/bloglist')
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+
+    const titles = blogsAtEnd.map(blog => blog.title)
+    expect(titles).toContain('some new blog')
+
 })
 
 afterAll(() => {
