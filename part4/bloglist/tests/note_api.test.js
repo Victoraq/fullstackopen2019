@@ -23,21 +23,21 @@ describe('when there is initially some blogs saved', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/)
     })
-    
+
     test('blog list returns the correct amount of blogs', async () => {
         const response = await api.get('/api/bloglist')
-    
+
         expect(response.body).toHaveLength(helper.initialBlogs.length)
     })
-    
+
 })
 
 describe('viewing a specific blog', () => {
     test('id property is named correctly', async () => {
         const response = await api.get('/api/bloglist')
-    
+
         const blog = response.body[0]
-    
+
         expect(blog.id).toBeDefined()
     })
 
@@ -51,18 +51,18 @@ describe('addition of a new note', () => {
             "url": "newmasterblog.com",
             "likes": "8999"
         }
-    
+
         await api.post('/api/bloglist')
-                .send(newBlog)
-                .expect(201)
-                .expect('Content-Type', /application\/json/)
-    
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
         const blogsAtEnd = await helper.blogsInDb()
         expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
-    
+
         const titles = blogsAtEnd.map(blog => blog.title)
         expect(titles).toContain('some new blog')
-    
+
     })
 
     test('default value of likes is 0', async () => {
@@ -71,36 +71,37 @@ describe('addition of a new note', () => {
             "author": "the new master",
             "url": "newmasterblog.com"
         }
-    
+
         await api.post('/api/bloglist')
-                .send(newBlog)
-                .expect(201)
-                .expect('Content-Type', /application\/json/)
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
         const blogsAtEnd = await helper.blogsInDb()
         const addedBlog = blogsAtEnd.find(blog => blog.title == newBlog.title)
-    
+
         expect(addedBlog.likes).toEqual(0)
     })
-    
+
     test('title and url missing from blog returns bad request', async () => {
         const missingPropBlog = {
             "author": "the new master"
         }
-    
+
         await api.post('/api/bloglist')
-                .send(missingPropBlog)
-                .expect(400)
-    
+            .send(missingPropBlog)
+            .expect(400)
+
     })
 })
 
-describe('deletion of a note', () => {
+describe('deletion of a blog', () => {
     test('succeeds with status 204 if id is valid', async () => {
         const blogsAtStart = await helper.blogsInDb()
         const blogToDelete = blogsAtStart[0]
 
         await api.delete(`/api/bloglist/${blogToDelete.id}`)
-                .expect(204)
+            .expect(204)
 
         const blogsAtEnd = await helper.blogsInDb()
 
@@ -111,6 +112,29 @@ describe('deletion of a note', () => {
         const titles = blogsAtEnd.map(blog => blog.title)
 
         expect(titles).not.toContain(blogToDelete.title)
+    })
+})
+
+describe('updating a blog', () => {
+    test('succeeds with updated blog', async () => {
+        const blogsAtStart = await helper.blogsInDb()
+        const blogToUpdate = { ...blogsAtStart[0] }
+
+        blogToUpdate.likes += 1
+
+        await api.put(`/api/bloglist/${blogToUpdate.id}`)
+            .send(blogToUpdate)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
+        const blogsAtEnd = await helper.blogsInDb()
+
+        const updatedBlogs = blogsAtEnd.find(
+            blog => blog.id == blogToUpdate.id
+        )
+
+        expect(updatedBlogs.likes).toEqual(blogsAtStart[0].likes + 1)
+
     })
 })
 
