@@ -75,6 +75,17 @@ test('default value of likes is 0', async () => {
     expect(addedBlog.likes).toEqual(0)
 })
 
+test('title and url missing from blog returns bad request', async () => {
+    const missingPropBlog = {
+        "author": "the new master"
+    }
+
+    await api.post('/api/bloglist')
+            .send(missingPropBlog)
+            .expect(400)
+
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })
