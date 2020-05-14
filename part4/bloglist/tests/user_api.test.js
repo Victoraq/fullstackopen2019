@@ -52,3 +52,46 @@ describe('when thre is initially one user in db', () => {
     })
 
 })
+
+describe('when insert wrong new users', () => {
+    test('username must be unique otherwhise return status 400', async () => {
+        const usersAtStart = await helper.usersInDb()
+
+        const newUserNotUnique = {
+            username: usersAtStart[0].username,
+            name: 'Matti Luukkainen',
+            password: 'passtheword'
+        }
+
+        const response = await api.post('/api/users')
+            .send(newUserNotUnique)
+            .expect(400)
+    })
+
+    test('username and password must be given otherwise return status 400', async () => {
+        const notCompletedUser = {
+            name: "New User"
+        }
+
+        const response = await api.post('/api/users')
+            .send(notCompletedUser)
+            .expect(400)
+
+        expect(response.body.error).toContain('username or password missing')
+    })
+
+    test('min length of username and password', async () => {
+        const newUser = {
+            name: "New User",
+            username: "Us",
+            password: "Pa"
+        }
+
+        const response = await api.post('/api/users')
+            .send(newUser)
+            .expect(400)
+
+        expect(response.body.error).toContain('min length of 3')
+    })
+
+})
