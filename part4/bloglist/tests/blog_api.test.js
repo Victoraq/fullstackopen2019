@@ -1,16 +1,37 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const app = require('../app')
 const Blog = require('../models/Blog')
+const User = require('../models/User')
 const helper = require('./test_helper')
 
 const api = supertest(app)
+let token = null
 
 beforeEach(async () => {
+
+    // initialize a user
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash: passwordHash })
+
+    await user.save()
+
+    const userForToken = {
+        username: user.username,
+        id: user._id
+    }
+
+    token = jwt.sign(userForToken, process.env.SECRET)
+
+    //initialize Blogs
     await Blog.deleteMany({})
 
     const blogObjects = helper.initialBlogs
-        .map(blog => new Blog(blog))
+        .map(blog => new Blog({ ...blog, user: user._id}))
 
     const promiseArray = blogObjects.map(blog => blog.save())
     await Promise.all(promiseArray)
@@ -43,7 +64,20 @@ describe('viewing a specific blog', () => {
 
 })
 
-describe('addition of a new note', () => {
+describe('addition of a new blog', () => {
+    test('adding a blog returns 401 status code if token is not provided', async () => {
+        const newBlog = {
+            "title": "some new blog",
+            "author": "the new master",
+            "url": "newmasterblog.com",
+            "likes": "8999"
+        }
+
+        await api.post('/api/bloglist')
+            .send(newBlog)
+            .expect(401)
+    })
+
     test('a valid blog can be added', async () => {
         const newBlog = {
             "title": "some new blog",
@@ -54,6 +88,7 @@ describe('addition of a new note', () => {
 
         await api.post('/api/bloglist')
             .send(newBlog)
+            .set('authorization', `bearer ${token}`)
             .expect(201)
             .expect('Content-Type', /application\/json/)
 
@@ -74,6 +109,7 @@ describe('addition of a new note', () => {
 
         await api.post('/api/bloglist')
             .send(newBlog)
+            .set('authorization', `bearer ${token}`)
             .expect(201)
             .expect('Content-Type', /application\/json/)
 
@@ -90,6 +126,7 @@ describe('addition of a new note', () => {
 
         await api.post('/api/bloglist')
             .send(missingPropBlog)
+            .set('authorization', `bearer ${token}`)
             .expect(400)
 
     })
@@ -101,6 +138,7 @@ describe('deletion of a blog', () => {
         const blogToDelete = blogsAtStart[0]
 
         await api.delete(`/api/bloglist/${blogToDelete.id}`)
+            .set('authorization', `bearer ${token}`)
             .expect(204)
 
         const blogsAtEnd = await helper.blogsInDb()
