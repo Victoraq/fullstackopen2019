@@ -3,12 +3,38 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+const Notification = ({ message, messageColor }) => {
+
+  const notificationStyle = {
+    color: messageColor,
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10
+  }
+
+  if (message === null) {
+    return null
+  }
+
+  return (
+    <div style={notificationStyle}>
+      {message}
+    </div>
+  )
+}
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' })
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const [message, setMessage] = useState(null)
+  const [messageColor, setMessageColor] = useState(null)
+
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -39,8 +65,12 @@ const App = () => {
       setUser(user)
       setUsername('')
       setPassword('')
-    } catch (exception) {
-      window.alert('Wrong credentials')
+    } catch (error) {
+      setMessage('wrong username or password')
+      setMessageColor('red')
+      setTimeout(() => {
+        setMessage(null)
+      }, 3500)
     }
   }
 
@@ -58,8 +88,17 @@ const App = () => {
     try {
       blogService.setToken(user.token)
       blogService.create(newBlog)
+      setMessage(`a new blog ${newBlog.title} by ${newBlog.author} added`)
+      setMessageColor('green')
+      setTimeout(() => {
+        setMessage(null)
+      }, 3500)
     } catch (error) {
-      window.alert(error)
+      setMessage(error)
+      setMessageColor('red')
+      setTimeout(() => {
+        setMessage(null)
+      }, 3500)
     }
   }
 
@@ -67,6 +106,9 @@ const App = () => {
     return (
       <div>
         <h2>Log in to application</h2>
+
+        <Notification message={message} messageColor={messageColor} />
+
 
         <form onSubmit={handleLogin}>
           <div>
@@ -97,6 +139,8 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
+
+      <Notification message={message} messageColor={messageColor} />
 
       <p>
         {user.name} logged in
